@@ -5,7 +5,7 @@ document it receives becomes part of what the website chat agent knows.
 ``AsyntaiUrlIndexer`` asks Asyntai to read web pages itself.
 """
 
-import os
+import re
 from typing import Any, Dict, List, Optional
 
 from haystack import Document, component, logging
@@ -31,7 +31,8 @@ def document_title(document: Document) -> str:
     for key in ("file_path", "file_name", "url", "source"):
         value = meta.get(key)
         if isinstance(value, str) and value.strip():
-            base = os.path.basename(value.strip().rstrip("/\\")) or value.strip()
+            # Split on both separators: a Windows path must also work on Linux.
+            base = re.split(r"[\\/]", value.strip().rstrip("/\\"))[-1] or value.strip()
             return base[:MAX_TITLE_CHARS]
     return f"Document {document.id[:12]}"
 
